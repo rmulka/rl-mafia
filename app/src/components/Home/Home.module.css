@@ -1,0 +1,13 @@
+.allLobbies {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: inherit;
+    padding: 2em;
+    text-align: center;
+}
+
+.createLobbyButton {
+    text-align: center;
+}

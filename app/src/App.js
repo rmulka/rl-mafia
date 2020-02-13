@@ -1,14 +1,28 @@
-import React from 'react';
-import './App.css';
+import React, { useState, useCallback } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        
-      </header>
-    </div>
-  );
+import './App.css';
+import Main from "./components/Main/Main";
+import { userContext } from './contexts';
+
+const App = () => {
+    const [name, setName] = useState('');
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [id, setId] = useState('');
+
+    const handleIdChange = useCallback((event) => {
+        setId(event.target.value);
+    }, []);
+
+    const handleAuthChange = useCallback((event) => {
+        setIsAuthenticated(event.target.value);
+    }, []);
+
+    return (
+        <userContext.Provider value={ { isAuthenticated, handleAuthChange, setName, name } }>
+            <Main/>
+        </userContext.Provider>
+    );
 }
 
 export default App;

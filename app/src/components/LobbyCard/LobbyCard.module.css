@@ -1,0 +1,28 @@
+.card {
+    width: 25vw;
+    height: 20vw;
+    margin: 1em;
+}
+
+.cardNumPlayers {
+    text-align: center;
+}
+
+.cardTitle {
+    text-align: center;
+}
+
+.openGameText {
+    color: green;
+    text-align: center;
+    font-size: large;
+}
+
+.inProgressGameText {
+    color: orange;
+    text-align: center;
+}
+
+.joinButton {
+    text-align: center;
+}
