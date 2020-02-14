@@ -5,6 +5,8 @@ const userContext = createContext({
     handleAuthChange: () => {},
     setName: () => {},
     name: '',
+    id: null,
+    setId: () => {},
 });
 
 export { userContext };

@@ -4,11 +4,11 @@ import NameEntry from '../NameEntry/NameEntry';
 import { userContext } from '../../contexts';
 import styles from './Main.module.css'
 
-const Main = (props) => {
+const Main = () => {
     return (
         <div className={styles.main}>
             <userContext.Consumer>
-                {({ isAuthenticated, name, setName }) => !isAuthenticated ? <NameEntry setName={setName} /> : <Home name={name}/>}
+                {({ isAuthenticated, name, setName, id, setId }) => !isAuthenticated ? <NameEntry setName={setName} setId={setId} /> : <Home name={name} id={id}/>}
             </userContext.Consumer>
         </div>
     )

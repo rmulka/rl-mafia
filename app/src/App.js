@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import uuid from 'uuid';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.css';
@@ -16,6 +17,7 @@ const App = () => {
 
     const handleAuthChange = useCallback((event) => {
         setIsAuthenticated(event.target.value);
+        setId(uuid.v1());
     }, []);
 
     return (

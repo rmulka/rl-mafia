@@ -7,24 +7,35 @@ import Typography from '@material-ui/core/Typography';
 import styles from './LobbyCard.module.css';
 
 const LobbyCard = (props) => {
-    const [numPlayers, setNumPlayers] = useState(1);
-    const [inProgress, setInProgress] = useState(false);
+    const joinGame = () => {
+        props.setCurrentPlayerLobbyId(props.lobbyId);
+
+        const currLobby = props.lobbies[props.lobbyId];
+        currLobby.players += 1;
+        props.setLobbies({
+            ...props.lobbies,
+            [props.lobbyId]: currLobby,
+        });
+    };
+
+    const currentLobby = props.lobbies[props.lobbyId];
+    const inProgress = props.lobbies[props.lobbyId].inProgress;
 
     const inProgressText = inProgress
-        ? <Typography className={styles.inProgressGameText}>Game in progress...</Typography>
+        ? <Typography className={styles.inProgressGameText}>In progress...</Typography>
         : <Typography className={styles.openGameText}>Open</Typography>;
 
     const joinButton = inProgress
         ? <Button color='primary' variant='contained' disabled>Join Game</Button>
-        : <Button color='primary' variant='contained'>Join Game</Button>;
+        : <Button color='primary' onClick={joinGame} variant='contained'>Join Game</Button>;
 
     return (
         <Card className={styles.card} variant="outlined">
-            <CardContent>
+            <CardContent className={styles.cardContent}>
                 {/*<Card.Img variant="top" src="" />*/}
-                <Typography className={styles.cardTitle} variant="h5">{props.name}'s Game</Typography>
+                <Typography className={styles.cardTitle} variant="h5">{currentLobby.creatorName}'s Game</Typography>
                 {inProgressText}
-                <Typography className={styles.cardNumPlayers}>Players: {props.players}</Typography>
+                <Typography className={styles.cardNumPlayers}>Players: {currentLobby.players}</Typography>
                 <div className={styles.joinButton}>{joinButton}</div>
             </CardContent>
         </Card>
