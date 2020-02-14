@@ -8,10 +8,13 @@ const Main = () => {
     return (
         <div className={styles.main}>
             <userContext.Consumer>
-                {({ isAuthenticated, name, setName, id, setId }) => !isAuthenticated ? <NameEntry setName={setName} setId={setId} /> : <Home name={name} id={id}/>}
+                {({ isAuthenticated, name, setName, id, setId }) => !isAuthenticated
+                    ? <NameEntry setName={setName} setId={setId} />
+                    : <Home name={name} id={id} />
+                }
             </userContext.Consumer>
         </div>
     )
-}
+};
 
 export default Main;

@@ -1,8 +1,7 @@
 .allLobbies {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-start;
-    align-items: flex-start;
+    justify-content: center;
     width: inherit;
     padding: 2em;
     text-align: center;

@@ -18,15 +18,15 @@ const LobbyPage = (props) => {
         <>
             <Container maxWidth="md" className={styles.container}>
                 {/*<Typography component="div" className={styles.container} />*/}
+                <Typography variant='h4'>{props.lobbyInfo.creatorName}'s Game</Typography>
                 {props.lobbyInfo.creatorId === props.playerId &&
                     <>
                         <label htmlFor="mafia-members">Number of mafia members:</label>
-                        <TextField
+                        <TextField className={styles.textField}
                             required
                             id="outlined-required"
-                            label="Required"
-                            defaultValue="Hello World"
-                            variant="outlined"
+                            defaultValue='2'
+                            variant='outlined'
                         />
                         <Button color='primary' onClick={startGame} variant='contained'>Start Game</Button>
                     </>
