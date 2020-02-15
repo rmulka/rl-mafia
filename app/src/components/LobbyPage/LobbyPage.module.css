@@ -1,7 +1,41 @@
+.allPlayerCards {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0 2em;
+}
+
+.button {
+    /*width: 40%;*/
+    padding-bottom: 1em;
+    text-align: center;
+}
+
 .container {
-    background-color: #cfe8fc;
-    height: 60vh;
-    margin-top: 2em;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    margin: 2em;
+}
+
+.gameTitle {
+
+}
+
+.playersBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.playersLabel {
+    /*text-align: center;*/
 }
 
 .textField {

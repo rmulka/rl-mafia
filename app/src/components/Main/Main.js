@@ -8,8 +8,8 @@ const Main = () => {
     return (
         <div className={styles.main}>
             <userContext.Consumer>
-                {({ isAuthenticated, name, setName, id, setId }) => !isAuthenticated
-                    ? <NameEntry setName={setName} setId={setId} />
+                {({ isAuthenticated, name, setName, id }) => !isAuthenticated
+                    ? <NameEntry setName={setName} />
                     : <Home name={name} id={id} />
                 }
             </userContext.Consumer>

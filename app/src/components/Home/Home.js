@@ -1,52 +1,58 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
 import Button from '@material-ui/core/Button';
 import LobbyCard from '../LobbyCard/LobbyCard';
 import LobbyPage from '../LobbyPage/LobbyPage';
 import styles from './Home.module.css'
+import socketIOClient from "socket.io-client";
 
-const dummyInitialState = {
-    [uuid.v1()]: {
-        creatorId: uuid.v1(),
-        creatorName: 'Cian',
-        players: 1,
-        inProgress: false,
-    },
-    [uuid.v1()]: {
-        creatorId: uuid.v1(),
-        creatorName: 'Kyle',
-        players: 3,
-        inProgress: false,
-    },
-    [uuid.v1()]: {
-        creatorId: uuid.v1(),
-        creatorName: 'Cian',
-        players: 1,
-        inProgress: true,
-    },
-    [uuid.v1()]: {
-        creatorId: uuid.v1(),
-        creatorName: 'Kyle',
-        players: 3,
-        inProgress: false,
-    },
-};
+const endpoint = 'http://127.0.0.1:4001';
 
 const Home = (props) => {
-    const [lobbies, setLobbies] = useState(dummyInitialState);
+    const [lobbies, setLobbies] = useState({});
+    const [lobbyPlayerIds, setLobbyPlayerIds] = useState({});
+    const [playerInfoMap, setPlayerInfoMap] = useState({});
     const [currentPlayerLobbyId, setCurrentPlayerLobbyId] = useState(null);
+
+    const socketRef = useRef(null);
+
+    useEffect(() => {
+        socketRef.current = socketIOClient(endpoint);
+        socketRef.current.emit('current-player', props.id, { name: props.name });
+        socketRef.current.emit('state-request');
+    }, [props.id, props.name]);
+
+    useEffect(() => {
+        socketRef.current.on('lobby-state', ({ lobbies, lobbyPlayerIds, playerInfoMap }) => {
+            setLobbies(lobbies);
+            setLobbyPlayerIds(lobbyPlayerIds);
+            setPlayerInfoMap(playerInfoMap);
+        });
+    }, [lobbies, props.id]);
+
+    useEffect(() => {
+        socketRef.current.on('lobby-destroyed', lobbyId => {
+            if (lobbyId === currentPlayerLobbyId) {
+                setCurrentPlayerLobbyId(null);
+            }
+        });
+    }, [currentPlayerLobbyId]);
 
     const createLobby = () => {
         const lobbyId = uuid.v1();
 
         setCurrentPlayerLobbyId(lobbyId);
 
-        setLobbies({...lobbies,  [lobbyId]: {
+        const newLobby = {
             creatorId: props.id,
             creatorName: props.name,
             players: 1,
             inProgress: false,
-        }})
+        };
+
+        setLobbies({...lobbies, [lobbyId]: newLobby});
+
+        socketRef.current.emit('new-lobby', lobbyId, newLobby);
     };
 
     const AllLobbies = () => {
@@ -55,10 +61,12 @@ const Home = (props) => {
                 {Object.keys(lobbies).map((lobbyId) => {
                     return <LobbyCard
                         lobbyId={lobbyId}
+                        playerId={props.id}
                         key={lobbyId}
                         lobbies={lobbies}
                         setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
                         setLobbies={setLobbies}
+                        socket={socketRef.current}
                     />
                 })}
             </div>
@@ -74,9 +82,16 @@ const Home = (props) => {
                 </div>
             </>
         ) : (
-            <LobbyPage lobbyId={currentPlayerLobbyId} playerId={props.id} lobbyInfo={lobbies[currentPlayerLobbyId]} setCurrentPlayerLobbyId={setCurrentPlayerLobbyId} />
+            <LobbyPage
+                lobbyId={currentPlayerLobbyId}
+                playerId={props.id}
+                lobbyInfo={lobbies[currentPlayerLobbyId]}
+                setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
+                lobbyPlayerIds={lobbyPlayerIds}
+                playerInfoMap={playerInfoMap}
+                socket={socketRef.current}
+            />
         )
-
     };
 
     return (

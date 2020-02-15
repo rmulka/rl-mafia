@@ -1,0 +1,12 @@
+.playerCard {
+    display: flex;
+    width: 90%;
+    height: 5vh;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+}
+
+.playerName {
+    text-align: center;
+}

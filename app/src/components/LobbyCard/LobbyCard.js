@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-// import Button from 'react-bootstrap/Button';
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
@@ -16,6 +15,8 @@ const LobbyCard = (props) => {
             ...props.lobbies,
             [props.lobbyId]: currLobby,
         });
+
+        props.socket.emit('joined-lobby', props.lobbyId, props.playerId);
     };
 
     const currentLobby = props.lobbies[props.lobbyId];

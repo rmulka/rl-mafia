@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import uuid from 'uuid';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 import './App.css';
 import Main from "./components/Main/Main";
@@ -11,20 +10,16 @@ const App = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [id, setId] = useState('');
 
-    const handleIdChange = useCallback((event) => {
-        setId(event.target.value);
-    }, []);
-
-    const handleAuthChange = useCallback((event) => {
-        setIsAuthenticated(event.target.value);
+    const authenticate = useCallback(() => {
+        setIsAuthenticated(true);
         setId(uuid.v1());
     }, []);
 
     return (
-        <userContext.Provider value={ { isAuthenticated, handleAuthChange, setName, name } }>
+        <userContext.Provider value={ { isAuthenticated, authenticate, setName, name, id } }>
             <Main/>
         </userContext.Provider>
     );
-}
+};
 
 export default App;
