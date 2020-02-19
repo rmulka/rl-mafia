@@ -2,11 +2,24 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    width: inherit;
-    padding: 2em;
+    padding: 1em;
     text-align: center;
 }
 
 .createLobbyButton {
+    width: inherit;
     text-align: center;
+    padding-bottom: 2em;
+}
+
+.homeContent {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+}
+
+.noGamesMessage {
+    padding: 2em;
 }

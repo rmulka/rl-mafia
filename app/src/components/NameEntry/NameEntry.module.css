@@ -2,9 +2,31 @@
     display: flex;
     justify-content: center;
     flex-direction: column;
-    margin: 20%;
+    padding: 5%;
+}
+
+.greeting {
+    padding-bottom: 2em;
+    text-align: center;
 }
 
 .nameInput {
-    padding-bottom: 1em;
+    display: flex;
+    padding-bottom: 3em;
+    align-items: center;
+    justify-content: center;
+}
+
+.nameLabel {
+    font-size: 2em;
+    padding-right: 0.5em;
+}
+
+.nameTextBox {
+    height: 2.5em;
+    width: 60%;
+}
+
+.submitButton {
+    text-align: center;
 }

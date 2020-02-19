@@ -8,21 +8,45 @@
     padding: 0 2em;
 }
 
+.assignmentImage {
+    max-width: 100%;
+}
+
 .button {
-    /*width: 40%;*/
-    padding-bottom: 1em;
     text-align: center;
+    padding: 0 1em;
 }
 
 .container {
     display: flex;
     flex-direction: column;
     background-color: white;
-    margin: 2em;
+    margin: 1em;
+    padding: 2em;
+}
+
+.gameButtons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .gameTitle {
+    padding-bottom: 1em;
+}
 
+.mafiaBox {
+    width: inherit;
+    text-align: center;
+    padding: 4em;
+}
+
+.mafiaDeclaration {
+    padding-bottom: 2em;
+}
+
+.mafiaMembersLabel {
+    font-size: 1em;
 }
 
 .playersBox {
@@ -31,7 +55,7 @@
     justify-content: center;
     align-items: center;
     padding-top: 1em;
-    padding-bottom: 1em;
+    padding-bottom: 1.5em;
 }
 
 .playersLabel {

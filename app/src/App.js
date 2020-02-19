@@ -17,7 +17,7 @@ const App = () => {
 
     return (
         <userContext.Provider value={ { isAuthenticated, authenticate, setName, name, id } }>
-            <Main/>
+            <Main />
         </userContext.Provider>
     );
 };

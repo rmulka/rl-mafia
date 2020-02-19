@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import uuid from 'uuid';
+import io from 'socket.io-client';
 import Button from '@material-ui/core/Button';
+import Typography from "@material-ui/core/Typography";
 import LobbyCard from '../LobbyCard/LobbyCard';
 import LobbyPage from '../LobbyPage/LobbyPage';
 import styles from './Home.module.css'
-import socketIOClient from "socket.io-client";
 
 const endpoint = 'http://127.0.0.1:4001';
 
@@ -13,14 +14,41 @@ const Home = (props) => {
     const [lobbyPlayerIds, setLobbyPlayerIds] = useState({});
     const [playerInfoMap, setPlayerInfoMap] = useState({});
     const [currentPlayerLobbyId, setCurrentPlayerLobbyId] = useState(null);
+    const [isMafia, setIsMafia] = useState(null);
 
     const socketRef = useRef(null);
 
     useEffect(() => {
-        socketRef.current = socketIOClient(endpoint);
-        socketRef.current.emit('current-player', props.id, { name: props.name });
+        socketRef.current = io(endpoint, {
+            timeout: 99999999999,
+            pingInterval: 500,
+            pingTimeout: 1000,
+            transports: ['websocket'],
+            upgrade: false,
+        });
+        socketRef.current.emit('current-player', props.userId, { name: props.name });
         socketRef.current.emit('state-request');
-    }, [props.id, props.name]);
+
+        return () => socketRef.current.emit('player-disconnect', props.userId);
+    }, [props.userId, props.name]);
+
+    useEffect(() => {
+        window.addEventListener("beforeunload",  event => {
+            socketRef.current.emit('player-disconnect', props.userId);
+        })
+    }, [props.userId]);
+
+    useEffect(() => {
+        socketRef.current.on('disconnect', () => {
+            socketRef.current.emit('player-disconnect', props.userId);
+        });
+    }, [props.userId]);
+
+    useEffect(() => {
+        socketRef.current.on('reconnecting', () => {
+            socketRef.current.emit('player-reconnect', props.userId);
+        })
+    }, [props.userId]);
 
     useEffect(() => {
         socketRef.current.on('lobby-state', ({ lobbies, lobbyPlayerIds, playerInfoMap }) => {
@@ -28,7 +56,7 @@ const Home = (props) => {
             setLobbyPlayerIds(lobbyPlayerIds);
             setPlayerInfoMap(playerInfoMap);
         });
-    }, [lobbies, props.id]);
+    }, []);
 
     useEffect(() => {
         socketRef.current.on('lobby-destroyed', lobbyId => {
@@ -38,13 +66,21 @@ const Home = (props) => {
         });
     }, [currentPlayerLobbyId]);
 
+    useEffect(() => {
+        socketRef.current.on('game-assignments', ({ lobbyId, randomMafia }) => {
+            if (lobbyId === currentPlayerLobbyId) {
+                setIsMafia(randomMafia[props.userId]);
+            }
+        })
+    }, [currentPlayerLobbyId, props.userId]);
+
     const createLobby = () => {
         const lobbyId = uuid.v1();
 
         setCurrentPlayerLobbyId(lobbyId);
 
         const newLobby = {
-            creatorId: props.id,
+            creatorId: props.userId,
             creatorName: props.name,
             players: 1,
             inProgress: false,
@@ -52,16 +88,20 @@ const Home = (props) => {
 
         setLobbies({...lobbies, [lobbyId]: newLobby});
 
-        socketRef.current.emit('new-lobby', lobbyId, newLobby);
+        socketRef.current.emit('new-lobby', lobbyId, props.userId, newLobby);
     };
 
     const AllLobbies = () => {
-        return (
+        const lobbyIds = Object.keys(lobbies);
+        return lobbyIds.length === 0
+        ? (
+            <Typography className={styles.noGamesMessage} variant='h3'>No mafia games to display</Typography>
+        ) : (
             <div className={styles.allLobbies}>
-                {Object.keys(lobbies).map((lobbyId) => {
+                {lobbyIds.map((lobbyId) => {
                     return <LobbyCard
                         lobbyId={lobbyId}
-                        playerId={props.id}
+                        playerId={props.userId}
                         key={lobbyId}
                         lobbies={lobbies}
                         setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
@@ -75,20 +115,21 @@ const Home = (props) => {
 
     const ConditionalRender = () => {
         return currentPlayerLobbyId === null ? (
-            <>
+            <div className={styles.homeContent}>
                 <AllLobbies />
                 <div className={styles.createLobbyButton}>
                     <Button onClick={createLobby} color='primary' variant='contained'>New Lobby</Button>
                 </div>
-            </>
+            </div>
         ) : (
             <LobbyPage
                 lobbyId={currentPlayerLobbyId}
-                playerId={props.id}
+                playerId={props.userId}
                 lobbyInfo={lobbies[currentPlayerLobbyId]}
                 setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
                 lobbyPlayerIds={lobbyPlayerIds}
                 playerInfoMap={playerInfoMap}
+                isMafia={isMafia}
                 socket={socketRef.current}
             />
         )

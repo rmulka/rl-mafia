@@ -10,7 +10,7 @@ const Main = () => {
             <userContext.Consumer>
                 {({ isAuthenticated, name, setName, id }) => !isAuthenticated
                     ? <NameEntry setName={setName} />
-                    : <Home name={name} id={id} />
+                    : <Home name={name} userId={id} />
                 }
             </userContext.Consumer>
         </div>
