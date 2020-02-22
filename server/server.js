@@ -11,7 +11,6 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 const lobbies = {}; // Current state of all lobbies
-const lobbyPlayerIds = {}; // Map of lobby ids to array of player ids
 const playerToLobbyMap = {}; // Map of player ids to corresponding lobby id if player is in a lobby
 const playerInfoMap = {}; // Map of player ids to player information
 const playerTimeouts = {}; // Handles current timeouts in progress for players who disconnected
@@ -38,25 +37,23 @@ const playerTimeout = (userId, socket) =>
 		delete playerInfoMap[userId];
 		if (playerToLobbyMap[userId]) {
 			const lobbyId = playerToLobbyMap[userId];
-			if (lobbyPlayerIds[lobbyId]) {
-				lobbyPlayerIds[lobbyId] = lobbyPlayerIds[lobbyId].filter(id => userId !== id);
-				if (lobbyPlayerIds[lobbyId].length === 0) {
-					socket.broadcast.emit('lobby-destroyed', lobbyId);
-					delete lobbies[lobbyId];
-					delete lobbyPlayerIds[lobbyId];
-				}
-			}
 			if (lobbies[lobbyId]) {
-				lobbies[lobbyId].players -= 1;
+				lobbies[lobbyId].playerIds = lobbies[lobbyId].playerIds.filter(id => userId !== id);
+				lobbies[lobbyId].players = lobbies[lobbyId].playerIds.length;
 				if (lobbies[lobbyId].players === 0 || userId === lobbies[lobbyId].creatorId) {
 					socket.broadcast.emit('lobby-destroyed', lobbyId);
 					delete lobbies[lobbyId];
-					delete lobbyPlayerIds[lobbyId];
+					socket.broadcast.emit('lobby-state', { lobbies, playerInfoMap });
+				} else {
+					socket.broadcast.emit(`lobby-playerId-update_${lobbyId}`, {
+						lobbyPlayerIds: lobbies[lobbyId].playerIds,
+						playerInfoMap,
+					});
+					socket.broadcast.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
 				}
 			}
 		}
 		delete playerToLobbyMap[userId];
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
 	}, 2000);
 
 const clearPlayerTimeout = userId => {
@@ -71,7 +68,16 @@ io.on('connection', socket => {
 
 	// Client requested state
 	socket.on('state-request', () => {
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
+		socket.emit('lobby-state', { lobbies, playerInfoMap });
+	});
+
+	// Client requested lobby info
+	socket.on('lobby-info-request', lobbyId => {
+		socket.emit('lobby-info', {
+			creatorId: lobbies[lobbyId].creatorId,
+			creatorName: lobbies[lobbyId].creatorName,
+			players: lobbies[lobbyId].players,
+		});
 	});
 
 	// Get client id
@@ -79,7 +85,6 @@ io.on('connection', socket => {
 		console.log(`id ${userId} registered`);
 		playerToLobbyMap[userId] = null;
 		playerInfoMap[userId] = info;
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
 	});
 
 	// Client reconnected
@@ -89,62 +94,103 @@ io.on('connection', socket => {
 	});
 
 	// Client created new lobby
-	socket.on('new-lobby', (lobbyId, userId, lobby) => {
-		lobbies[lobbyId] = lobby;
-		lobbyPlayerIds[lobbyId] = [lobby.creatorId];
+	socket.on('new-lobby', (lobbyId, userId) => {
+		lobbies[lobbyId] = {
+			creatorId: userId,
+			creatorName: playerInfoMap[userId].name,
+			players: 1,
+			inProgress: false,
+			playerIds: [userId],
+		};
+
 		playerToLobbyMap[userId] = lobbyId;
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
+
+		socket.broadcast.emit(`lobby-playerId-update_${lobbyId}`, {
+			lobbyPlayerIds: lobbies[lobbyId].playerIds,
+			playerInfoMap,
+		});
+		socket.emit(`lobby-playerId-update_${lobbyId}`, {
+			lobbyPlayerIds: lobbies[lobbyId].playerIds,
+			playerInfoMap,
+		});
+		socket.broadcast.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
+		socket.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
+
+		socket.emit('lobby-state', { lobbies, playerInfoMap });
+		socket.broadcast.emit('lobby-state', { lobbies, playerInfoMap });
 	});
 
 	// Client joined a lobby
 	socket.on('joined-lobby', (lobbyId, playerId) => {
-		lobbies[lobbyId].players += 1;
-		lobbyPlayerIds[lobbyId].push(playerId);
+		lobbies[lobbyId].playerIds.push(playerId);
+		lobbies[lobbyId].players = lobbies[lobbyId].playerIds.length;
 		playerToLobbyMap[playerId] = lobbyId;
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
+		console.log('playerId: ', playerId);
+		console.log('lobbyId: ', lobbyId);
+		socket.emit('lobby-info', {
+			creatorId: lobbies[lobbyId].creatorId,
+			creatorName: lobbies[lobbyId].creatorName,
+			players: lobbies[lobbyId].players,
+		});
+		io.emit(`lobby-playerId-update_${lobbyId}`, {
+			lobbyPlayerIds: lobbies[lobbyId].playerIds,
+			playerInfoMap,
+		});
+		io.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
 	});
 
 	// Client left a lobby
 	socket.on('left-lobby', (lobbyId, playerId) => {
-		lobbies[lobbyId].players -= 1;
+		lobbies[lobbyId].playerIds = lobbies[lobbyId].playerIds.filter(id => playerId !== id);
+		lobbies[lobbyId].players = lobbies[lobbyId].playerIds.length;
 		if (lobbies[lobbyId].players === 0 || playerId === lobbies[lobbyId].creatorId) {
-			delete lobbies[lobbyId];
 			socket.broadcast.emit('lobby-destroyed', lobbyId);
-		}
-		if (lobbyPlayerIds[lobbyId]) {
-			lobbyPlayerIds[lobbyId] = lobbyPlayerIds[lobbyId].filter(id => playerId !== id);
+			delete lobbies[lobbyId];
+			socket.emit('lobby-state', { lobbies, playerInfoMap });
+			socket.broadcast.emit('lobby-state', { lobbies, playerInfoMap });
+		} else {
+			socket.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
+			socket.broadcast.emit(`lobby-playerId-update_${lobbyId}`, {
+				lobbyPlayerIds: lobbies[lobbyId].playerIds,
+				playerInfoMap,
+			});
+			socket.broadcast.emit(`lobby-playerNum-update_${lobbyId}`, lobbies[lobbyId].players);
 		}
 		delete playerToLobbyMap[playerId];
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
 	});
 
 	// Client started game
 	socket.on('started-game', (lobbyId, numMafia) => {
 		const randomMafia = {};
-		const playerLen = lobbyPlayerIds[lobbyId].length;
+		const playerLen = lobbies[lobbyId].playerIds.length;
 		lobbies[lobbyId].inProgress = true;
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
+		socket.broadcast.emit(`lobby-status-update_${lobbyId}`, lobbies[lobbyId].inProgress);
+		socket.emit(`lobby-status-update_${lobbyId}`, lobbies[lobbyId].inProgress);
 		const mafiaPlayers = new Array(playerLen).fill(false);
 		for (let i = 0; i < numMafia; i++) {
 			mafiaPlayers[i] = true;
 		}
 		shuffleArray(mafiaPlayers);
-		lobbyPlayerIds[lobbyId].forEach((id, index) => {
+		lobbies[lobbyId].playerIds.forEach((id, index) => {
 			randomMafia[id] = mafiaPlayers[index];
 		});
-		socket.broadcast.emit('game-assignments', { lobbyId, randomMafia });
-		socket.emit('game-assignments', { lobbyId, randomMafia });
+		socket.broadcast.emit(`game-assignments_${lobbyId}`, randomMafia);
+		socket.emit(`game-assignments_${lobbyId}`, randomMafia);
 	});
 
 	// Client ended game
 	socket.on('ended-game', lobbyId => {
 		lobbies[lobbyId].inProgress = false;
-		socket.broadcast.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
-		socket.emit('lobby-state', { lobbies, lobbyPlayerIds, playerInfoMap });
+		socket.broadcast.emit(`lobby-status-update_${lobbyId}`, lobbies[lobbyId].inProgress);
+		socket.emit(`lobby-status-update_${lobbyId}`, lobbies[lobbyId].inProgress);
+		socket.emit(`lobby-playerId-update_${lobbyId}`, {
+			lobbyPlayerIds: lobbies[lobbyId].playerIds,
+			playerInfoMap,
+		});
+		socket.broadcast.emit(`lobby-playerId-update_${lobbyId}`, {
+			lobbyPlayerIds: lobbies[lobbyId].playerIds,
+			playerInfoMap,
+		});
 	});
 
 	socket.on('player-disconnect', userId => {

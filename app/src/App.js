@@ -1,25 +1,12 @@
-import React, { useState, useCallback } from 'react';
-import uuid from 'uuid';
-
+import React from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
-import Main from "./components/Main/Main";
-import { userContext } from './contexts';
+import Main from './components/Main/Main';
 
-const App = () => {
-    const [name, setName] = useState('');
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [id, setId] = useState('');
-
-    const authenticate = useCallback(() => {
-        setIsAuthenticated(true);
-        setId(uuid.v1());
-    }, []);
-
-    return (
-        <userContext.Provider value={ { isAuthenticated, authenticate, setName, name, id } }>
-            <Main />
-        </userContext.Provider>
-    );
-};
+const App = () => (
+    <Router>
+        <Main />
+    </Router>
+);
 
 export default App;

@@ -1,0 +1,11 @@
+.allLobbies {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 1em;
+    text-align: center;
+}
+
+.noGamesMessage {
+    padding: 2em;
+}

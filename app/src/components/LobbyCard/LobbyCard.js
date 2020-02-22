@@ -1,25 +1,27 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '@material-ui/core/Button';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 import styles from './LobbyCard.module.css';
 
 const LobbyCard = (props) => {
-    const joinGame = () => {
-        props.setCurrentPlayerLobbyId(props.lobbyId);
+    const [numPlayers, setNumPlayers] = useState(props.players);
+    const [inProgress, setInProgress] = useState(false);
 
-        const currLobby = props.lobbies[props.lobbyId];
-        currLobby.players += 1;
-        props.setLobbies({
-            ...props.lobbies,
-            [props.lobbyId]: currLobby,
+    useEffect(() => {
+        props.socket.on(`lobby-playerNum-update_${props.lobbyId}`, numPlayers => {
+            setNumPlayers(numPlayers);
         });
 
-        props.socket.emit('joined-lobby', props.lobbyId, props.playerId);
-    };
+        props.socket.on(`lobby-status-update_${props.lobbyId}`, inProgress => {
+            setInProgress(inProgress);
+        });
+    }, [props.lobbyId, props.socket]);
 
-    const currentLobby = props.lobbies[props.lobbyId];
-    const inProgress = props.lobbies[props.lobbyId].inProgress;
+    const joinGame = () => {
+        props.setCurrentPlayerLobbyId(props.lobbyId);
+        props.socket.emit('joined-lobby', props.lobbyId, props.userId);
+    };
 
     const inProgressText = inProgress
         ? <Typography style={{ fontSize: '0.4em' }} className={styles.inProgressGameText}>In progress...</Typography>
@@ -32,11 +34,11 @@ const LobbyCard = (props) => {
     return (
         <Card className={styles.card} variant="outlined">
             <div className={styles.cardContent}>
-                <Typography style={{ fontSize: '1.5em' }} className={styles.cardTitle} variant="h5">{currentLobby.creatorName}'s Game</Typography>
+                <Typography style={{ fontSize: '1.5em' }} className={styles.cardTitle} variant="h5">{props.creatorName}'s Game</Typography>
                 <div className={styles.cardBody}>
                     {inProgressText}
                 </div>
-                <Typography style={{ fontSize: '1.3em' }} className={styles.cardNumPlayers}>Players: {currentLobby.players}</Typography>
+                <Typography style={{ fontSize: '1.3em' }} className={styles.cardNumPlayers}>Players: {numPlayers}</Typography>
                 <div className={styles.joinButton}>{joinButton}</div>
             </div>
         </Card>

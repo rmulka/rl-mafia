@@ -1,15 +1,5 @@
-.allPlayerCards {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 0 2em;
-}
-
 .assignmentImage {
-    max-width: 100%;
+    max-width: 50%;
 }
 
 .button {
@@ -56,12 +46,4 @@
     align-items: center;
     padding-top: 1em;
     padding-bottom: 1.5em;
-}
-
-.playersLabel {
-    /*text-align: center;*/
-}
-
-.textField {
-    width: 4em;
 }

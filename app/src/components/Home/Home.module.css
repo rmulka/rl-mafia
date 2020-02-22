@@ -1,9 +1,6 @@
-.allLobbies {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+.backToNameChange {
+    text-align: left;
     padding: 1em;
-    text-align: center;
 }
 
 .createLobbyButton {
@@ -20,6 +17,17 @@
     text-align: center;
 }
 
-.noGamesMessage {
-    padding: 2em;
+.nameRow {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.navLink {
+    text-decoration: none;
+}
+
+.signedInAsText {
+    text-align: right;
+    padding: 1em;
 }
