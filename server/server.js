@@ -125,8 +125,6 @@ io.on('connection', socket => {
 		lobbies[lobbyId].playerIds.push(playerId);
 		lobbies[lobbyId].players = lobbies[lobbyId].playerIds.length;
 		playerToLobbyMap[playerId] = lobbyId;
-		console.log('playerId: ', playerId);
-		console.log('lobbyId: ', lobbyId);
 		socket.emit('lobby-info', {
 			creatorId: lobbies[lobbyId].creatorId,
 			creatorName: lobbies[lobbyId].creatorName,

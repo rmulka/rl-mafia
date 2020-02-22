@@ -7,7 +7,7 @@ const LobbyPlayersList = (props) => {
         playerInfoMap: {
             [props.creatorId]: { name: props.creatorName },
         },
-        lobbyPlayerIds: [props.creatorId],    
+        lobbyPlayerIds: [props.creatorId],
     };
 
     const [lobbyState, setLobbyState] = useState(initialState);
