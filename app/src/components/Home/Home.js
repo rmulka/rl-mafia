@@ -18,7 +18,7 @@ const Home = (props) => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        socketRef.current = io(endpoint, {
+        socketRef.current = io(undefined, {
             transports: ['websocket'],
             upgrade: false,
         });
