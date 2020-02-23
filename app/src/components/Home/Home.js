@@ -9,8 +9,6 @@ import AllLobbiesBox from '../AllLobbiesBox/AllLobbiesBox';
 import LobbyPage from '../LobbyPage/LobbyPage';
 import styles from './Home.module.css'
 
-const endpoint = 'http://127.0.0.1:4001';
-
 const Home = (props) => {
     const [currentPlayerLobbyId, setCurrentPlayerLobbyId] = useState(null);
     const [socketActive, setSocketActive] = useState(false);
