@@ -197,4 +197,15 @@ io.on('connection', socket => {
 	});
 });
 
+if (process.env.NODE_ENV === 'production') {
+	// Express will serve up production assets
+	app.use(express.static('app/build'));
+
+	// Express serve up index.html file if it doesn't recognize route
+	const path = require('path');
+	app.get('*', (req, res) => {
+		res.sendFile(path.resolve(__dirname, 'app', 'build', 'index.html'));
+	});
+}
+
 server.listen(port, () => console.log(`Listening on port ${port}`));
