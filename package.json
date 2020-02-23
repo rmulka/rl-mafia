@@ -6,7 +6,7 @@
     "react-scripts": "3.3.1"
   },
   "scripts": {
-    "start": "cd server && node index.js",
+    "start": "cd server && npm install && node index.js",
     "build": "cd app && react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
