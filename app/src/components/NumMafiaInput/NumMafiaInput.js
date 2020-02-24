@@ -28,7 +28,7 @@ const NumMafiaInput = (props) => {
                      id='standard number'
                      variant='outlined'
                      type='number'
-                     defaultValue={0}
+                     defaultValue={1}
                      onChange={handleTextChange}
         />
         : <TextField className={styles.textField}

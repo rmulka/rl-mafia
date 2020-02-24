@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import LobbyPlayersList from '../LobbyPlayersList/LobbyPlayersList';
 import NumMafiaInput from '../NumMafiaInput/NumMafiaInput';
+import Loading from '../Loading/Loading';
 import styles from './LobbyPage.module.css';
 
 const LobbyPage = (props) => {
@@ -11,7 +12,7 @@ const LobbyPage = (props) => {
     const [lobbyInfo, setLobbyInfo] = useState({});
     const [inProgress, setInProgress] = useState(false);
 
-    const numMafiaRef = useRef(0);
+    const numMafiaRef = useRef(1);
     const numPlayersRef = useRef(1);
 
     useEffect(() => {
@@ -72,6 +73,11 @@ const LobbyPage = (props) => {
                 </Button>
             </div>
             }
+            {!(lobbyInfo.creatorId === props.userId) &&
+            <Typography style={{ 'text-align': 'center' }} variant='h5'>
+                Waiting for {lobbyInfo.creatorName} to end game...
+            </Typography>
+            }
         </>
     );
 
@@ -109,7 +115,7 @@ const LobbyPage = (props) => {
                 </div>
             </div>
         </>
-        : <></>
+        : <Loading />
     );
 
     return (

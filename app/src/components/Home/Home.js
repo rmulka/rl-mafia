@@ -15,8 +15,10 @@ const Home = (props) => {
 
     const socketRef = useRef(null);
 
+    const endpoint = 'http://localhost:4001';
+
     useEffect(() => {
-        socketRef.current = io(undefined, {
+        socketRef.current = io(endpoint, {
             transports: ['websocket'],
             upgrade: false,
         });
