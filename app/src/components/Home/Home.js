@@ -15,7 +15,7 @@ const Home = (props) => {
 
     const socketRef = useRef(null);
 
-    const endpoint = 'http://localhost:4001';
+    const endpoint = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4001';
 
     useEffect(() => {
         socketRef.current = io(endpoint, {
