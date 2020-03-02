@@ -10,7 +10,6 @@ import styles from './Home.module.css'
 
 const Home = (props) => {
     const [currentPlayerLobbyId, setCurrentPlayerLobbyId] = useState(null);
-    // const [socketActive, setSocketActive] = useState(false);
 
     useEffect(() => {
         props.socket.emit('current-player', props.userId, {name: props.name});
@@ -23,16 +22,8 @@ const Home = (props) => {
                 props.socket.emit('left-lobby', currentPlayerLobbyId, props.userId);
             }
         });
-
-        // props.socket.on('connect', () => {
-        //     if (props.socket.connected) {
-        //         props.socket.emit('current-player', props.userId, {name: props.name});
-        //         setSocketActive(true);
-        //     }
-        // });
         
         return () => {
-            // props.socket.emit('player-disconnect', props.userId);
             if (currentPlayerLobbyId) {
                 props.socket.emit('left-lobby', currentPlayerLobbyId, props.userId);
             }
@@ -56,40 +47,38 @@ const Home = (props) => {
     };
 
     return (
-        // socketActive && (
-            currentPlayerLobbyId === null
-            ? (
-                <div className={styles.homeContent}>
-                    <div className={styles.nameRow}>
-                        <div className={styles.backToNameChange}>
-                            <Link className={styles.navLink} to='/name-entry'>
-                                <Button type='button' color='primary' size='small' variant='outlined' startIcon={<ArrowBackIcon />}>
-                                    Change Name
-                                </Button>
-                            </Link>
-                        </div>
-                        <div className={styles.signedInAsText}>
-                            <Typography>Signed in as: {props.name}</Typography>
-                        </div>
+        currentPlayerLobbyId === null
+        ? (
+            <div className={styles.homeContent}>
+                <div className={styles.nameRow}>
+                    <div className={styles.backToNameChange}>
+                        <Link className={styles.navLink} to='/name-entry'>
+                            <Button type='button' color='primary' size='small' variant='outlined' startIcon={<ArrowBackIcon />}>
+                                Change Name
+                            </Button>
+                        </Link>
                     </div>
-                    <AllLobbiesBox
-                        userId={props.userId}
-                        socket={props.socket}
-                        setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
-                    />
-                    <div className={styles.createLobbyButton}>
-                        <Button onClick={createLobby} color='primary' variant='contained'>New Lobby</Button>
+                    <div className={styles.signedInAsText}>
+                        <Typography>Signed in as: {props.name}</Typography>
                     </div>
                 </div>
-            ) : (
-                <LobbyPage
-                    lobbyId={currentPlayerLobbyId}
+                <AllLobbiesBox
                     userId={props.userId}
-                    setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
                     socket={props.socket}
+                    setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
                 />
-            )
-        // )
+                <div className={styles.createLobbyButton}>
+                    <Button onClick={createLobby} color='primary' variant='contained'>New Lobby</Button>
+                </div>
+            </div>
+        ) : (
+            <LobbyPage
+                lobbyId={currentPlayerLobbyId}
+                userId={props.userId}
+                setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
+                socket={props.socket}
+            />
+        )
     );
 };
 
