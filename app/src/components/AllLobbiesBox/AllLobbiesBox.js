@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Typography from '@material-ui/core/Typography';
 import LobbyCard from '../LobbyCard/LobbyCard';
 import styles from './AllLobbiesBox.module.css';
-import Loading from "../Loading/Loading";
+import Loading from '../Loading/Loading';
 
 const AllLobbiesBox = (props) => {
     const [lobbies, setLobbies] = useState({});
@@ -13,7 +13,7 @@ const AllLobbiesBox = (props) => {
     useEffect(() => {
         props.socket.emit('state-request');
 
-        props.socket.on('lobby-state', ({ lobbies, playerInfoMap }) => {
+        props.socket.on('lobby-state', lobbies => {
             setLobbies(lobbies);
             setIsLoaded(true);
         })
@@ -32,6 +32,7 @@ const AllLobbiesBox = (props) => {
                         userId={props.userId}
                         creatorName={lobbies[lobbyId].creatorName}
                         players={lobbies[lobbyId].players}
+                        inProgress={lobbies[lobbyId].inProgress}
                         setCurrentPlayerLobbyId={props.setCurrentPlayerLobbyId}
                         socket={props.socket}
                     />

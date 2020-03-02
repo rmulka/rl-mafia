@@ -8,5 +8,5 @@ module.exports = {
         jasmine: true,
     },
 
-    extends: ['eslint:recommended', 'plugin:prettier/recommended'],
+    extends: ['eslint:recommended', 'plugin:prettier/recommended', 'plugin:react/recommended'],
 };

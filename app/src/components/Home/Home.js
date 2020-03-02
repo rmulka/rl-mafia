@@ -1,7 +1,6 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import uuid from 'uuid';
-import io from 'socket.io-client';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
@@ -11,92 +10,86 @@ import styles from './Home.module.css'
 
 const Home = (props) => {
     const [currentPlayerLobbyId, setCurrentPlayerLobbyId] = useState(null);
-    const [socketActive, setSocketActive] = useState(false);
-
-    const socketRef = useRef(null);
-
-    const endpoint = process.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4001';
+    // const [socketActive, setSocketActive] = useState(false);
 
     useEffect(() => {
-        socketRef.current = io(endpoint, {
-            transports: ['websocket'],
-            upgrade: false,
-        });
-        setSocketActive(true);
-    }, []);
-
-    useEffect(() => {
-        socketRef.current.emit('current-player', props.userId, { name: props.name });
-
-        return () => socketRef.current.emit('player-disconnect', props.userId);
-    }, [props.userId, props.name]);
+        props.socket.emit('current-player', props.userId, {name: props.name});
+    }, [props.name, props.socket, props.userId]);
 
     useEffect(() => {
         window.addEventListener('beforeunload',  event => {
-            socketRef.current.emit('player-disconnect', props.userId);
+            props.socket.emit('player-disconnect', props.userId);
+            if (currentPlayerLobbyId) {
+                props.socket.emit('left-lobby', currentPlayerLobbyId, props.userId);
+            }
         });
 
-        socketRef.current.on('disconnect', () => {
-            socketRef.current.emit('player-disconnect', props.userId);
-        });
-
-        socketRef.current.on('reconnecting', () => {
-            socketRef.current.emit('player-reconnect', props.userId);
-        });
-    }, [props.userId]);
+        // props.socket.on('connect', () => {
+        //     if (props.socket.connected) {
+        //         props.socket.emit('current-player', props.userId, {name: props.name});
+        //         setSocketActive(true);
+        //     }
+        // });
+        
+        return () => {
+            // props.socket.emit('player-disconnect', props.userId);
+            if (currentPlayerLobbyId) {
+                props.socket.emit('left-lobby', currentPlayerLobbyId, props.userId);
+            }
+        }
+    }, [currentPlayerLobbyId, props.name, props.socket, props.userId]);
 
     useEffect(() => {
-        socketRef.current.on('lobby-destroyed', lobbyId => {
+        props.socket.on('lobby-destroyed', lobbyId => {
             if (lobbyId === currentPlayerLobbyId) {
                 setCurrentPlayerLobbyId(null);
             }
         });
-    }, [currentPlayerLobbyId]);
+    }, [currentPlayerLobbyId, props.socket]);
 
     const createLobby = () => {
         const lobbyId = uuid.v1();
 
-        socketRef.current.emit('new-lobby', lobbyId, props.userId);
+        props.socket.emit('new-lobby', lobbyId, props.userId);
 
         setCurrentPlayerLobbyId(lobbyId);
-
-        socketRef.current.emit('lobby-info-request', lobbyId);
     };
 
     return (
-        currentPlayerLobbyId === null
-        ? (
-            <div className={styles.homeContent}>
-                <div className={styles.nameRow}>
-                    <div className={styles.backToNameChange}>
-                        <Link className={styles.navLink} to='/name-entry'>
-                            <Button type='button' color='primary' size='small' variant='outlined' startIcon={<ArrowBackIcon />}>
-                                Change Name
-                            </Button>
-                        </Link>
+        // socketActive && (
+            currentPlayerLobbyId === null
+            ? (
+                <div className={styles.homeContent}>
+                    <div className={styles.nameRow}>
+                        <div className={styles.backToNameChange}>
+                            <Link className={styles.navLink} to='/name-entry'>
+                                <Button type='button' color='primary' size='small' variant='outlined' startIcon={<ArrowBackIcon />}>
+                                    Change Name
+                                </Button>
+                            </Link>
+                        </div>
+                        <div className={styles.signedInAsText}>
+                            <Typography>Signed in as: {props.name}</Typography>
+                        </div>
                     </div>
-                    <div className={styles.signedInAsText}>
-                        <Typography>Signed in as: {props.name}</Typography>
+                    <AllLobbiesBox
+                        userId={props.userId}
+                        socket={props.socket}
+                        setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
+                    />
+                    <div className={styles.createLobbyButton}>
+                        <Button onClick={createLobby} color='primary' variant='contained'>New Lobby</Button>
                     </div>
                 </div>
-                {socketActive &&
-                <AllLobbiesBox
+            ) : (
+                <LobbyPage
+                    lobbyId={currentPlayerLobbyId}
                     userId={props.userId}
-                    socket={socketRef.current}
                     setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
-                />}
-                <div className={styles.createLobbyButton}>
-                    <Button onClick={createLobby} color='primary' variant='contained'>New Lobby</Button>
-                </div>
-            </div>
-        ) : (
-            <LobbyPage
-                lobbyId={currentPlayerLobbyId}
-                userId={props.userId}
-                setCurrentPlayerLobbyId={setCurrentPlayerLobbyId}
-                socket={socketRef.current}
-            />
-        )
+                    socket={props.socket}
+                />
+            )
+        // )
     );
 };
 

@@ -16,27 +16,32 @@ const LobbyPage = (props) => {
     const numPlayersRef = useRef(1);
 
     useEffect(() => {
+        props.socket.emit('lobby-info-request', props.lobbyId);
+
         props.socket.on('lobby-info', lobbyInfo => {
             setLobbyInfo(lobbyInfo);
         });
-    }, [props.socket]);
 
-    useEffect(() => {
-        props.socket.on(`game-assignments_${props.lobbyId}`, randomMafia => {
+        props.socket.on('game-assignments', randomMafia => {
             setIsMafia(randomMafia[props.userId]);
         });
 
-        props.socket.on(`lobby-status-update_${props.lobbyId}`, inProgress => {
-            setInProgress(inProgress);
+        props.socket.on('lobby-status-update', ({ inProgress, lobbyId }) => {
+            if (lobbyId === props.lobbyId) {
+                setInProgress(inProgress);
+            }
         });
 
+        props.socket.on('lobby-playerNum-update', ({ numPlayers, lobbyId }) => {
+            if (lobbyId === props.lobbyId) {
+                numPlayersRef.current = numPlayers;
+            }
+        });
+
+        return () => {
+            props.socket.emit('left-lobby', props.lobbyId, props.userId);
+        }
     }, [props.lobbyId, props.socket, props.userId]);
-
-    useEffect(() => {
-        props.socket.on(`lobby-playerNum-update_${props.lobbyId}`, numPlayers => {
-            numPlayersRef.current = numPlayers;
-        });
-    });
 
     const leaveGame = () => {
         props.socket.emit('left-lobby', props.lobbyId, props.userId);
@@ -74,7 +79,7 @@ const LobbyPage = (props) => {
             </div>
             }
             {!(lobbyInfo.creatorId === props.userId) &&
-            <Typography style={{ 'text-align': 'center' }} variant='h5'>
+            <Typography style={{ 'textAlign': 'center' }} variant='h5'>
                 Waiting for {lobbyInfo.creatorName} to end game...
             </Typography>
             }
@@ -90,6 +95,7 @@ const LobbyPage = (props) => {
                 <label htmlFor='mafia-members' className={styles.mafiaMembersLabel}>Number of mafia members:</label>
                 <NumMafiaInput
                     numMafia={numMafiaRef}
+                    numPlayers={numPlayersRef}
                     socket={props.socket}
                     lobbyId={props.lobbyId}
                 />

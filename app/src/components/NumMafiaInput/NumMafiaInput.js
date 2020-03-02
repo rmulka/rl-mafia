@@ -4,21 +4,23 @@ import styles from './NumMafiaInput.module.css';
 
 const NumMafiaInput = (props) => {
     const [numError, setNumError] = useState(false);
-    const [numPlayers, setNumPlayers] = useState(1);
+    const [numPlayers, setNumPlayers] = useState(props.numPlayers.current);
 
     useEffect(() => {
-        props.socket.on(`lobby-playerNum-update_${props.lobbyId}`, numPlayers => {
-            setNumPlayers(numPlayers);
+        props.socket.on('lobby-playerNum-update', ({ numPlayers, lobbyId }) => {
+            if (lobbyId === props.lobbyId) {
+                setNumPlayers(numPlayers);
+            }
         });
-    });
+    }, [props.lobbyId, props.numPlayers, props.socket]);
 
     const handleTextChange = (event) => {
         const numMaf = event.target.value;
         if (isNaN(numMaf) || (numMaf < 1 || numMaf > numPlayers)) {
             setNumError(true);
         } else {
-            setNumError(false);
             props.numMafia.current = numMaf;
+            setNumError(false);
         }
     };
 
@@ -28,7 +30,7 @@ const NumMafiaInput = (props) => {
                      id='standard number'
                      variant='outlined'
                      type='number'
-                     defaultValue={1}
+                     defaultValue={props.numMafia.current}
                      onChange={handleTextChange}
         />
         : <TextField className={styles.textField}
