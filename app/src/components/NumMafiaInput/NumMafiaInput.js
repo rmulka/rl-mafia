@@ -26,19 +26,21 @@ const NumMafiaInput = (props) => {
 
     return (
         !numError
-        ? <TextField className={styles.textField}
-                     id='standard number'
-                     variant='outlined'
-                     type='number'
-                     defaultValue={props.numMafia.current}
-                     onChange={handleTextChange}
+        ? <TextField
+                className={styles.textField}
+                id='standard number'
+                variant='outlined'
+                type='number'
+                defaultValue={props.numMafia.current}
+                onChange={handleTextChange}
         />
-        : <TextField className={styles.textField}
-                     error
-                     id='outlined-error-helper-text'
-                     helperText={`Enter number 1 to ${numPlayers}`}
-                     variant='outlined'
-                     onChange={handleTextChange}
+        : <TextField
+                className={styles.textField}
+                error
+                id='outlined-error-helper-text'
+                helperText={`Enter number 1 to ${numPlayers}`}
+                variant='outlined'
+                onChange={handleTextChange}
         />
     );
 };
