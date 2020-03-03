@@ -22,7 +22,7 @@ const AllLobbiesBox = (props) => {
 
         return () => {
             props.socket.off('lobby-state', handleLobbyStateUpdate);
-        }
+        };
     }, [props.socket]);
 
     const LoadedLobbies = () => (

@@ -47,7 +47,7 @@ const SocketSetup = (props) =>  {
             socketRef.current.off('connect_error');
             socketRef.current.off('connect_timout');
             socketRef.current.off('reconnect_error');
-        }
+        };
     }, [props.name, props.userId]);
 
     return (

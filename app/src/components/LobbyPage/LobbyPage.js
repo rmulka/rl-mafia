@@ -42,7 +42,7 @@ const LobbyPage = (props) => {
             props.socket.off('game-assignments', handleGameAssignmentsUpdate);
             props.socket.off('lobby-status-update', handleLobbyStatusUpdate);
             props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
-        }
+        };
     }, [props.lobbyId, props.socket, props.userId]);
 
     const leaveGame = () => {

@@ -17,7 +17,7 @@ const NumMafiaInput = (props) => {
 
         return () => {
             props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
-        }
+        };
     }, [props.lobbyId, props.numPlayers, props.socket]);
 
     const handleTextChange = (event) => {

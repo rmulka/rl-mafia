@@ -17,7 +17,7 @@ const LobbyPlayersList = (props) => {
 
         return () => {
             props.socket.off('lobby-playerId-update', handlePlayerIdUpdate);
-        }
+        };
     }, [props.lobbyId, props.socket]);
     
     return (

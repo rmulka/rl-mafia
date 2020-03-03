@@ -26,7 +26,7 @@ const LobbyCard = (props) => {
         return () => {
             props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
             props.socket.off('lobby-status-update', handleStatusUpdate);
-        }
+        };
     }, [props.lobbyId, props.socket]);
 
     const joinGame = () => {
