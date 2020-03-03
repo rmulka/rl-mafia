@@ -11,12 +11,18 @@ const AllLobbiesBox = (props) => {
     const lobbyIds = Object.keys(lobbies);
 
     useEffect(() => {
-        props.socket.emit('state-request');
-
-        props.socket.on('lobby-state', lobbies => {
+        const handleLobbyStateUpdate = lobbies => {
             setLobbies(lobbies);
             setIsLoaded(true);
-        })
+        };
+
+        props.socket.emit('state-request');
+
+        props.socket.on('lobby-state', handleLobbyStateUpdate);
+
+        return () => {
+            props.socket.off('lobby-state', handleLobbyStateUpdate);
+        }
     }, [props.socket]);
 
     const LoadedLobbies = () => (

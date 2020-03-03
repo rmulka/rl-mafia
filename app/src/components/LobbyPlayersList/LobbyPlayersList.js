@@ -7,11 +7,17 @@ const LobbyPlayersList = (props) => {
     const [lobbyState, setLobbyState] = useState(null);
     
     useEffect(() => {
+        const handlePlayerIdUpdate = ({ lobbyPlayerIds, playerInfoMap }) => {
+            setLobbyState({ playerInfoMap, lobbyPlayerIds });
+        };
+
         props.socket.emit('playerId-request', props.lobbyId);
 
-        props.socket.on('lobby-playerId-update', ({ lobbyPlayerIds, playerInfoMap }) => {
-            setLobbyState({ playerInfoMap, lobbyPlayerIds });
-        })
+        props.socket.on('lobby-playerId-update', handlePlayerIdUpdate);
+
+        return () => {
+            props.socket.off('lobby-playerId-update', handlePlayerIdUpdate);
+        }
     }, [props.lobbyId, props.socket]);
     
     return (

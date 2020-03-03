@@ -9,17 +9,24 @@ const LobbyCard = (props) => {
     const [inProgress, setInProgress] = useState(props.inProgress);
 
     useEffect(() => {
-        props.socket.on('lobby-playerNum-update', ({ numPlayers, lobbyId }) => {
+        const handlePlayerNumUpdate = ({ numPlayers, lobbyId }) => {
             if (lobbyId === props.lobbyId) {
                 setNumPlayers(numPlayers);
             }
-        }, []);
-
-        props.socket.on('lobby-status-update', ({ inProgress, lobbyId }) => {
+        };
+        const handleStatusUpdate = ({ inProgress, lobbyId }) => {
             if (lobbyId === props.lobbyId) {
                 setInProgress(inProgress);
             }
-        });
+        };
+
+        props.socket.on('lobby-playerNum-update', handlePlayerNumUpdate);
+        props.socket.on('lobby-status-update', handleStatusUpdate);
+
+        return () => {
+            props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
+            props.socket.off('lobby-status-update', handleStatusUpdate);
+        }
     }, [props.lobbyId, props.socket]);
 
     const joinGame = () => {

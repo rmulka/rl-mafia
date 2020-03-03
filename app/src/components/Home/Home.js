@@ -31,11 +31,17 @@ const Home = (props) => {
     }, [currentPlayerLobbyId, props.name, props.socket, props.userId]);
 
     useEffect(() => {
-        props.socket.on('lobby-destroyed', lobbyId => {
+        const handleLobbyDestroyed = lobbyId => {
             if (lobbyId === currentPlayerLobbyId) {
                 setCurrentPlayerLobbyId(null);
             }
-        });
+        };
+
+        props.socket.on('lobby-destroyed', handleLobbyDestroyed);
+
+        return () => {
+            props.socket.off('lobby-destroyed', handleLobbyDestroyed);
+        }
     }, [currentPlayerLobbyId, props.socket]);
 
     const createLobby = () => {

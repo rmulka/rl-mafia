@@ -16,30 +16,32 @@ const LobbyPage = (props) => {
     const numPlayersRef = useRef(1);
 
     useEffect(() => {
-        props.socket.emit('lobby-info-request', props.lobbyId);
-
-        props.socket.on('lobby-info', lobbyInfo => {
-            setLobbyInfo(lobbyInfo);
-        });
-
-        props.socket.on('game-assignments', randomMafia => {
-            setIsMafia(randomMafia[props.userId]);
-        });
-
-        props.socket.on('lobby-status-update', ({ inProgress, lobbyId }) => {
+        const handleLobbyInfoUpdate = lobbyInfo => { setLobbyInfo(lobbyInfo) };
+        const handleGameAssignmentsUpdate = randomMafia => { setIsMafia(randomMafia[props.userId]) };
+        const handleLobbyStatusUpdate = ({ inProgress, lobbyId }) => {
             if (lobbyId === props.lobbyId) {
                 setInProgress(inProgress);
             }
-        });
-
-        props.socket.on('lobby-playerNum-update', ({ numPlayers, lobbyId }) => {
+        };
+        const handlePlayerNumUpdate = ({ numPlayers, lobbyId }) => {
             if (lobbyId === props.lobbyId) {
                 numPlayersRef.current = numPlayers;
             }
-        });
+        };
+
+        props.socket.emit('lobby-info-request', props.lobbyId);
+
+        props.socket.on('lobby-info', handleLobbyInfoUpdate);
+        props.socket.on('game-assignments', handleGameAssignmentsUpdate);
+        props.socket.on('lobby-status-update', handleLobbyStatusUpdate);
+        props.socket.on('lobby-playerNum-update', handlePlayerNumUpdate);
 
         return () => {
             props.socket.emit('left-lobby', props.lobbyId, props.userId);
+            props.socket.off('lobby-info', handleLobbyInfoUpdate);
+            props.socket.off('game-assignments', handleGameAssignmentsUpdate);
+            props.socket.off('lobby-status-update', handleLobbyStatusUpdate);
+            props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
         }
     }, [props.lobbyId, props.socket, props.userId]);
 

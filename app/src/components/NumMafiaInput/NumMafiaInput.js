@@ -7,11 +7,17 @@ const NumMafiaInput = (props) => {
     const [numPlayers, setNumPlayers] = useState(props.numPlayers.current);
 
     useEffect(() => {
-        props.socket.on('lobby-playerNum-update', ({ numPlayers, lobbyId }) => {
+        const handlePlayerNumUpdate = ({ numPlayers, lobbyId }) => {
             if (lobbyId === props.lobbyId) {
                 setNumPlayers(numPlayers);
             }
-        });
+        };
+
+        props.socket.on('lobby-playerNum-update', handlePlayerNumUpdate);
+
+        return () => {
+            props.socket.off('lobby-playerNum-update', handlePlayerNumUpdate);
+        }
     }, [props.lobbyId, props.numPlayers, props.socket]);
 
     const handleTextChange = (event) => {

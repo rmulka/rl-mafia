@@ -42,6 +42,11 @@ const SocketSetup = (props) =>  {
 
         return () => {
             socketRef.current.emit('player-disconnect', props.userId);
+            socketRef.current.off('connect');
+            socketRef.current.off('player-reconnect');
+            socketRef.current.off('connect_error');
+            socketRef.current.off('connect_timout');
+            socketRef.current.off('reconnect_error');
         }
     }, [props.name, props.userId]);
 

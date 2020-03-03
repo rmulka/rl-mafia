@@ -12,11 +12,11 @@ const App = () => {
 
     const history = useHistory();
 
-    const authenticate = useCallback((e) => {
-        e.preventDefault();
+    const authenticate = useCallback((event) => {
+        event.preventDefault();
         setId(uuid.v1());
         setIsAuthenticated(true);
-        history.push('/lobbies')
+        history.push('/lobbies');
     }, [history]);
 
     return (
