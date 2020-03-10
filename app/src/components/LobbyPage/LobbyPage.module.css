@@ -47,3 +47,22 @@
     padding-top: 1em;
     padding-bottom: 1.5em;
 }
+
+.waitingGrid {
+    display: inline-grid;
+    grid-template-columns: 1fr fit-content(100%) 1fr;
+}
+
+.waitingBoxMessage {
+    width: fit-content;
+    justify-self: center;
+}
+
+.loadingDots {
+    margin: 0;
+}
+
+.waitingBoxRightContainer {
+    width: fit-content;
+    justify-self: start;
+}

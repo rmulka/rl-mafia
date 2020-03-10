@@ -5,6 +5,7 @@ import Typography from '@material-ui/core/Typography';
 import LobbyPlayersList from '../LobbyPlayersList/LobbyPlayersList';
 import NumMafiaInput from '../NumMafiaInput/NumMafiaInput';
 import Loading from '../Loading/Loading';
+import LoadingDots from '../Loading/LoadingDots';
 import styles from './LobbyPage.module.css';
 
 const LobbyPage = (props) => {
@@ -81,9 +82,15 @@ const LobbyPage = (props) => {
             </div>
             }
             {!(lobbyInfo.creatorId === props.userId) &&
-            <Typography style={{ 'textAlign': 'center' }} variant='h5'>
-                Waiting for {lobbyInfo.creatorName} to end game...
-            </Typography>
+            <div className={styles.waitingGrid}>
+                <div>{' '}</div>
+                <Typography className={styles.waitingBoxMessage} variant='h5'>
+                    Waiting for {lobbyInfo.creatorName} to end the game
+                </Typography>
+                <div className={styles.waitingBoxRightContainer}>
+                    <LoadingDots className={styles.loadingDots} />
+                </div>
+            </div>
             }
         </>
     );
